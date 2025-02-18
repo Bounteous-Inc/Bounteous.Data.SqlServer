@@ -1,4 +1,4 @@
-name: Publish Xerris.DotNet.Data.SqlServer
+name: Bounteous.Data.SqlServer
 
 on:
   pull_request:
