@@ -11,11 +11,10 @@ public abstract class SqlServerDbContextFactory<T> : DbContextFactory<T> where T
     }
 
     protected override DbContextOptions<DbContextBase> ApplyOptions(bool sensitiveDataLoggingEnabled = false)
-    {
-        return new DbContextOptionsBuilder<DbContextBase>().UseSqlServer(ConnectionBuilder.AdminConnectionString,
+        => new DbContextOptionsBuilder<DbContextBase>()
+            .UseSqlServer(ConnectionBuilder.AdminConnectionString,
                 sqlOptions => { sqlOptions.EnableRetryOnFailure(); })
             .EnableSensitiveDataLogging(sensitiveDataLoggingEnabled: sensitiveDataLoggingEnabled)
             .EnableDetailedErrors()
             .Options;
-    }
 }
