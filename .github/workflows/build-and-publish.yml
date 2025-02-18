@@ -8,10 +8,10 @@ on:
 jobs:
   publish:
     if: github.event.pull_request.merged == true
-    uses: xerris/xerris-common-workflows/.github/workflows/build-and-publish-to-nuget.yml@main
+    uses: Bounteous-Inc/bounteous-dotnet-common-workflows/.github/workflows/build-and-publish-to-nuget.yml@main
     with:
-      csproj-path: './src/Xerris.DotNet.Data.SqlServer/Xerris.DotNet.Data.SqlServer.csproj'
-      nuget-package-name: 'xerris.dotnet.data.sqlserver'
+      csproj-path: './src/Bounteous.Data.SqlServer/Bounteous.Data.SqlServer.csproj'
+      nuget-package-name: 'Bounteous.Data.SqlServer'
       dotnet-version: '8.0.x'
       release-path: 'net8.0'
     secrets:

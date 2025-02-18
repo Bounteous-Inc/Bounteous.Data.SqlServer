@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
+using Xerris.DotNet.Data;
 
-namespace Xerris.DotNet.Data.SqlServer;
+namespace Bounteous.Data.SqlServer;
 
 public abstract class SqlServerDbContextFactory<T> : DbContextFactory<T> where T : DbContext
 {
