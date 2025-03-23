@@ -2,7 +2,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Bounteous.Data.SqlServer;
 
-public abstract class SqlServerDbContextFactory<T> : DbContextFactory<T> where T : DbContext
+public abstract class SqlServerDbContextFactory<T> : DbContextFactory<T> where T : IDbContext
 {
     public SqlServerDbContextFactory(IConnectionBuilder connectionBuilder, IDbContextObserver observer) 
         : base(connectionBuilder, observer)
