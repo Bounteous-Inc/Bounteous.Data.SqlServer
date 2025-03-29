@@ -8,7 +8,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="Bounteous.Data" Version="0.0.6" />
+      <PackageReference Include="Bounteous.Core" Version="0.0.8" />
+      <PackageReference Include="Bounteous.Data" Version="0.0.7" />
       <PackageReference Include="EntityFrameworkCore.NamingConventions" Version="8.0.0" />
       <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.3" />
       <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.3">
@@ -20,4 +21,14 @@
       <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="9.0.3" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Content Update="docs\README.md">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Update="docs/README.md" Pack="true" PackagePath="" />
+    </ItemGroup>  
+    
 </Project>
