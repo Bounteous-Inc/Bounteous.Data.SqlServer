@@ -2,7 +2,6 @@ using Bounteous.Data.SqlServer.Tests.Context;
 using Bounteous.Data.SqlServer.Tests.Domain;
 using Microsoft.EntityFrameworkCore;
 using Moq;
-using Microsoft.EntityFrameworkCore.SqlServer.Infrastructure.Internal;
 
 namespace Bounteous.Data.SqlServer.Tests;
 
