@@ -22,10 +22,17 @@ public class SqlServerDbContextFactoryTests
         // Act
         var options = factory.ExposeApplyOptions(sensitiveDataLoggingEnabled: true);
 
+        // Convert to generic options for DummyDbContext
+        var typedOptions = new DbContextOptionsBuilder<DummyDbContext>()
+            .UseSqlServer(expectedConnectionString)
+            .Options;
+
+        using var context = new DummyDbContext(typedOptions);
+        var actualConnectionString = context.Database.GetDbConnection().ConnectionString;
+
         // Assert
-        var extension = options.Extensions.OfType<SqlServerOptionsExtension>().FirstOrDefault();
-        Assert.NotNull(extension);
-        Assert.Equal(expectedConnectionString, extension.ConnectionString);
+        Assert.NotNull(options);
+        Assert.Equal(expectedConnectionString, actualConnectionString);
     }
 
 
@@ -47,6 +54,14 @@ public class SqlServerDbContextFactoryTests
 
         // Assert
         mockObserver.Verify(o => o.OnSaved(), Times.Once);
+    }
+
+    public class DummyDbContext : DbContext
+    {
+        public DummyDbContext(DbContextOptions<DummyDbContext> options)
+            : base(options)
+        {
+        }
     }
 
 }
