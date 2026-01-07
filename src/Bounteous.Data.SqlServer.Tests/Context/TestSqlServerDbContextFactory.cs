@@ -10,6 +10,9 @@ public class TestSqlServerDbContextFactory : SqlServerDbContextFactory<SqlServer
     public DbContextOptions<DbContextBase> ExposeApplyOptions(bool sensitiveDataLoggingEnabled = false)
         => ApplyOptions(sensitiveDataLoggingEnabled);
 
+    public SqlServerTestDbContext ExposeCreate(DbContextOptions<DbContextBase> options, IDbContextObserver observer)
+        => Create(options, observer);
+
     protected override SqlServerTestDbContext Create(DbContextOptions<DbContextBase> options, IDbContextObserver observer) =>
         new(options, observer);
 }
