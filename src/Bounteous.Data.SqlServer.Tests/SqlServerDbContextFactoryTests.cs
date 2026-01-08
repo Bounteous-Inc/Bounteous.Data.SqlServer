@@ -1,3 +1,4 @@
+using System;
 using Bounteous.Data.SqlServer.Tests.Context;
 using Bounteous.Data.SqlServer.Tests.Domain;
 using Microsoft.EntityFrameworkCore;
@@ -43,7 +44,7 @@ public class SqlServerDbContextFactoryTests
         // Arrange
         var mockObserver = new Mock<IDbContextObserver>();
 
-        var options = new DbContextOptionsBuilder<DbContextBase>()
+        var options = new DbContextOptionsBuilder<DbContextBase<Guid>>()
             .UseInMemoryDatabase(databaseName: "TestDb")
             .Options;
 
@@ -154,7 +155,7 @@ public class SqlServerDbContextFactoryTests
         // Arrange
         var mockObserver = new Mock<IDbContextObserver>();
 
-        var options = new DbContextOptionsBuilder<DbContextBase>()
+        var options = new DbContextOptionsBuilder<DbContextBase<Guid>>()
             .UseInMemoryDatabase(databaseName: "TestDbMultiple")
             .Options;
 
