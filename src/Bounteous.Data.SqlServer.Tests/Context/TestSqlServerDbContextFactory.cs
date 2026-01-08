@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Bounteous.Data.SqlServer.Tests.Context;
 
-public class TestSqlServerDbContextFactory : SqlServerDbContextFactory<SqlServerTestDbContext>
+public class TestSqlServerDbContextFactory : SqlServerDbContextFactory<SqlServerTestDbContext, Guid>
 {
     public TestSqlServerDbContextFactory(IConnectionBuilder connectionBuilder, IDbContextObserver observer)
         : base(connectionBuilder, observer) { }
