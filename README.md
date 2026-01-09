@@ -91,16 +91,16 @@ public class MyConnectionStringProvider : IConnectionStringProvider
 ```csharp
 public class CustomerService
 {
-    private readonly IDbContextFactory<MyDbContext> _contextFactory;
+    private readonly IDbContextFactory<MyDbContext, Guid> _contextFactory;
 
-    public CustomerService(IDbContextFactory<MyDbContext> contextFactory)
+    public CustomerService(IDbContextFactory<MyDbContext, Guid> contextFactory)
     {
         _contextFactory = contextFactory;
     }
 
     public async Task<Customer> CreateCustomerAsync(string name, string email, Guid userId)
     {
-        using var context = _contextFactory.Create().WithUserId(userId);
+        using var context = _contextFactory.Create(userId);
         
         var customer = new Customer 
         { 
@@ -210,16 +210,16 @@ The library supports SQL Server enterprise features:
 ```csharp
 public class ProductService
 {
-    private readonly IDbContextFactory<MyDbContext> _contextFactory;
+    private readonly IDbContextFactory<MyDbContext, Guid> _contextFactory;
 
-    public ProductService(IDbContextFactory<MyDbContext> contextFactory)
+    public ProductService(IDbContextFactory<MyDbContext, Guid> contextFactory)
     {
         _contextFactory = contextFactory;
     }
 
     public async Task<Product> CreateProductAsync(string name, decimal price, Guid userId)
     {
-        using var context = _contextFactory.Create().WithUserId(userId);
+        using var context = _contextFactory.Create(userId);
         
         var product = new Product 
         { 
@@ -246,7 +246,7 @@ public class ProductService
 
     public async Task<Product> UpdateProductAsync(Guid productId, string name, decimal price, Guid userId)
     {
-        using var context = _contextFactory.Create().WithUserId(userId);
+        using var context = _contextFactory.Create(userId);
         
         var product = await context.Products.FindById(productId);
         product.Name = name;
@@ -263,9 +263,9 @@ public class ProductService
 ```csharp
 public class OrderService
 {
-    private readonly IDbContextFactory<MyDbContext> _contextFactory;
+    private readonly IDbContextFactory<MyDbContext, Guid> _contextFactory;
 
-    public OrderService(IDbContextFactory<MyDbContext> contextFactory)
+    public OrderService(IDbContextFactory<MyDbContext, Guid> contextFactory)
     {
         _contextFactory = contextFactory;
     }
@@ -318,7 +318,7 @@ public class OrderService
 ```csharp
 public async Task DeleteProductAsync(Guid productId, Guid userId)
 {
-    using var context = _contextFactory.Create().WithUserId(userId);
+    using var context = _contextFactory.Create(userId);
     
     var product = await context.Products.FindById(productId);
     
@@ -334,9 +334,9 @@ public async Task DeleteProductAsync(Guid productId, Guid userId)
 ```csharp
 public class ReportService
 {
-    private readonly IDbContextFactory<MyDbContext> _contextFactory;
+    private readonly IDbContextFactory<MyDbContext, Guid> _contextFactory;
 
-    public ReportService(IDbContextFactory<MyDbContext> contextFactory)
+    public ReportService(IDbContextFactory<MyDbContext, Guid> contextFactory)
     {
         _contextFactory = contextFactory;
     }
