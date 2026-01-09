@@ -1,4 +1,3 @@
-using System;
 using Bounteous.Data.SqlServer.Tests.Context;
 using Bounteous.Data.SqlServer.Tests.Domain;
 using Microsoft.EntityFrameworkCore;
@@ -8,23 +7,32 @@ namespace Bounteous.Data.SqlServer.Tests;
 
 public class SqlServerDbContextFactoryTests
 {
+    private const string TrustedConnectionString = "Server=localhost;Database=TestDb;Trusted_Connection=True;";
+    private const string SqlAuthConnectionString = "Server=localhost;Database=TestDb;User Id=sa;Password=Test123;";
+    private const string BasicConnectionString = "Server=localhost;Database=TestDb;";
+
+    private static TestSqlServerDbContextFactory CreateFactory(string connectionString)
+    {
+        var mockConnectionBuilder = new Mock<IConnectionBuilder>();
+        mockConnectionBuilder.Setup(cb => cb.AdminConnectionString).Returns(connectionString);
+        var mockObserver = new Mock<IDbContextObserver>();
+        var mockIdentityProvider = new Mock<IIdentityProvider<Guid>>();
+        return new TestSqlServerDbContextFactory(mockConnectionBuilder.Object, mockObserver.Object,
+            mockIdentityProvider.Object);
+    }
+
     [Fact]
-    public void ApplyOptions_ShouldConfigureSqlServerOptionsCorrectly()
+    public void ApplyOptions()
     {
         // Arrange
-        var inputConnectionString = "Server=localhost;Database=TestDb;Trusted_Connection=True;";
-        var mockConnectionBuilder = new Mock<IConnectionBuilder>();
-        mockConnectionBuilder.Setup(cb => cb.AdminConnectionString).Returns(inputConnectionString);
-
-        var mockObserver = new Mock<IDbContextObserver>();
-        var factory = new TestSqlServerDbContextFactory(mockConnectionBuilder.Object, mockObserver.Object);
+        var factory = CreateFactory(TrustedConnectionString);
 
         // Act
         var options = factory.ExposeApplyOptions(sensitiveDataLoggingEnabled: true);
 
         // Convert to generic options for DummyDbContext
         var typedOptions = new DbContextOptionsBuilder<DummyDbContext>()
-            .UseSqlServer(inputConnectionString)
+            .UseSqlServer(TrustedConnectionString)
             .Options;
 
         using var context = new DummyDbContext(typedOptions);
@@ -37,18 +45,18 @@ public class SqlServerDbContextFactoryTests
         Assert.Contains("Integrated Security=True", actualConnectionString);
     }
 
-
     [Fact]
-    public async Task SaveChangesAsync_ShouldCallObserverOnSaved()
+    public async Task SaveChangesAsyncCallsObserver()
     {
         // Arrange
         var mockObserver = new Mock<IDbContextObserver>();
+        var mockIdentityProvider = new Mock<IIdentityProvider<Guid>>();
 
         var options = new DbContextOptionsBuilder<DbContextBase<Guid>>()
             .UseInMemoryDatabase(databaseName: "TestDb")
             .Options;
 
-        await using var context = new SqlServerTestDbContext(options, mockObserver.Object);
+        await using var context = new SqlServerTestDbContext(options, mockObserver.Object, mockIdentityProvider.Object);
         context.Entities.Add(new TestEntity { Id = Guid.NewGuid() });
 
         // Act
@@ -58,53 +66,33 @@ public class SqlServerDbContextFactoryTests
         mockObserver.Verify(o => o.OnSaved(), Times.Once);
     }
 
-    [Fact]
-    public void ApplyOptions_WithSensitiveDataLoggingDisabled_ShouldConfigureCorrectly()
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void ApplyOptionsWithSensitiveDataLogging(bool sensitiveDataLoggingEnabled)
     {
-        // Arrange
-        var inputConnectionString = "Server=localhost;Database=TestDb;User Id=sa;Password=Test123;";
-        var mockConnectionBuilder = new Mock<IConnectionBuilder>();
-        mockConnectionBuilder.Setup(cb => cb.AdminConnectionString).Returns(inputConnectionString);
-
-        var mockObserver = new Mock<IDbContextObserver>();
-        var factory = new TestSqlServerDbContextFactory(mockConnectionBuilder.Object, mockObserver.Object);
-
-        // Act
-        var options = factory.ExposeApplyOptions(sensitiveDataLoggingEnabled: false);
-
-        // Assert
+        var factory = CreateFactory(SqlAuthConnectionString);
+        var options = factory.ExposeApplyOptions(sensitiveDataLoggingEnabled);
         Assert.NotNull(options);
     }
 
     [Fact]
-    public void Constructor_ShouldInitializeWithValidParameters()
+    public void ConstructorShouldInitializeWithValidParameters()
     {
-        // Arrange
-        var mockConnectionBuilder = new Mock<IConnectionBuilder>();
-        mockConnectionBuilder.Setup(cb => cb.AdminConnectionString).Returns("Server=localhost;Database=TestDb;");
-        var mockObserver = new Mock<IDbContextObserver>();
-
-        // Act
-        var factory = new TestSqlServerDbContextFactory(mockConnectionBuilder.Object, mockObserver.Object);
-
-        // Assert
+        var factory = CreateFactory(BasicConnectionString);
         Assert.NotNull(factory);
     }
 
     [Fact]
-    public void Create_ShouldReturnDbContextInstance()
+    public void CreateShouldReturnDbContextInstance()
     {
-        // Arrange
-        var inputConnectionString = "Server=localhost;Database=TestDb;Trusted_Connection=True;";
-        var mockConnectionBuilder = new Mock<IConnectionBuilder>();
-        mockConnectionBuilder.Setup(cb => cb.AdminConnectionString).Returns(inputConnectionString);
-
+        var factory = CreateFactory(TrustedConnectionString);
         var mockObserver = new Mock<IDbContextObserver>();
-        var factory = new TestSqlServerDbContextFactory(mockConnectionBuilder.Object, mockObserver.Object);
+        var mockIdentityProvider = new Mock<IIdentityProvider<Guid>>();
 
         // Act
         var options = factory.ExposeApplyOptions();
-        var context = factory.ExposeCreate(options, mockObserver.Object);
+        var context = factory.ExposeCreate(options, mockObserver.Object, mockIdentityProvider.Object);
 
         // Assert
         Assert.NotNull(context);
@@ -112,54 +100,26 @@ public class SqlServerDbContextFactoryTests
     }
 
     [Fact]
-    public void ApplyOptions_ShouldEnableRetryOnFailure()
+    public void ApplyOptionsShouldEnableRetryOnFailureAndDetailedErrors()
     {
-        // Arrange
-        var inputConnectionString = "Server=localhost;Database=TestDb;Trusted_Connection=True;";
-        var mockConnectionBuilder = new Mock<IConnectionBuilder>();
-        mockConnectionBuilder.Setup(cb => cb.AdminConnectionString).Returns(inputConnectionString);
+        var factory = CreateFactory(TrustedConnectionString);
 
-        var mockObserver = new Mock<IDbContextObserver>();
-        var factory = new TestSqlServerDbContextFactory(mockConnectionBuilder.Object, mockObserver.Object);
-
-        // Act
         var options = factory.ExposeApplyOptions();
-
-        // Assert
         Assert.NotNull(options);
-        // Retry on failure is configured internally in SQL Server options
     }
 
     [Fact]
-    public void ApplyOptions_ShouldEnableDetailedErrors()
-    {
-        // Arrange
-        var inputConnectionString = "Server=localhost;Database=TestDb;Trusted_Connection=True;";
-        var mockConnectionBuilder = new Mock<IConnectionBuilder>();
-        mockConnectionBuilder.Setup(cb => cb.AdminConnectionString).Returns(inputConnectionString);
-
-        var mockObserver = new Mock<IDbContextObserver>();
-        var factory = new TestSqlServerDbContextFactory(mockConnectionBuilder.Object, mockObserver.Object);
-
-        // Act
-        var options = factory.ExposeApplyOptions();
-
-        // Assert
-        Assert.NotNull(options);
-        // Detailed errors are enabled in the options configuration
-    }
-
-    [Fact]
-    public async Task SaveChangesAsync_WithMultipleEntities_ShouldCallObserverOnce()
+    public async Task SaveChangesAsyncWithMultipleEntities()
     {
         // Arrange
         var mockObserver = new Mock<IDbContextObserver>();
+        var mockIdentityProvider = new Mock<IIdentityProvider<Guid>>();
 
         var options = new DbContextOptionsBuilder<DbContextBase<Guid>>()
             .UseInMemoryDatabase(databaseName: "TestDbMultiple")
             .Options;
 
-        await using var context = new SqlServerTestDbContext(options, mockObserver.Object);
+        await using var context = new SqlServerTestDbContext(options, mockObserver.Object, mockIdentityProvider.Object);
         context.Entities.Add(new TestEntity { Id = Guid.NewGuid() });
         context.Entities.Add(new TestEntity { Id = Guid.NewGuid() });
         context.Entities.Add(new TestEntity { Id = Guid.NewGuid() });
@@ -172,39 +132,16 @@ public class SqlServerDbContextFactoryTests
         Assert.Equal(3, context.Entities.Count());
     }
 
-    [Fact]
-    public void ApplyOptions_WithDifferentConnectionStrings_ShouldHandleCorrectly()
+    [Theory]
+    [InlineData("Server=localhost;Database=TestDb;Trusted_Connection=True;")]
+    [InlineData("Server=localhost,1433;Database=TestDb;User Id=sa;Password=Test123;")]
+    [InlineData("Data Source=localhost;Initial Catalog=TestDb;Integrated Security=True;")]
+    public void ApplyOptionsWithDifferentConnectionStrings(string connectionString)
     {
-        // Arrange - Test with different connection string formats
-        var connectionStrings = new[]
-        {
-            "Server=localhost;Database=TestDb;Trusted_Connection=True;",
-            "Server=localhost,1433;Database=TestDb;User Id=sa;Password=Test123;",
-            "Data Source=localhost;Initial Catalog=TestDb;Integrated Security=True;"
-        };
-
-        foreach (var connString in connectionStrings)
-        {
-            var mockConnectionBuilder = new Mock<IConnectionBuilder>();
-            mockConnectionBuilder.Setup(cb => cb.AdminConnectionString).Returns(connString);
-
-            var mockObserver = new Mock<IDbContextObserver>();
-            var factory = new TestSqlServerDbContextFactory(mockConnectionBuilder.Object, mockObserver.Object);
-
-            // Act
-            var options = factory.ExposeApplyOptions();
-
-            // Assert
-            Assert.NotNull(options);
-        }
+        var factory = CreateFactory(connectionString);
+        var options = factory.ExposeApplyOptions();
+        Assert.NotNull(options);
     }
 
-    public class DummyDbContext : DbContext
-    {
-        public DummyDbContext(DbContextOptions<DummyDbContext> options)
-            : base(options)
-        {
-        }
-    }
-
+    public class DummyDbContext(DbContextOptions<DummyDbContext> options) : DbContext(options);
 }

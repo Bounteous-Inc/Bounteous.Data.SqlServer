@@ -32,8 +32,11 @@ public void ConfigureServices(IServiceCollection services)
     // Register your connection string provider
     services.AddSingleton<IConnectionStringProvider, MyConnectionStringProvider>();
     
+    // Register your identity provider
+    services.AddScoped<IIdentityProvider<Guid>, MyIdentityProvider>();
+    
     // Register your SQL Server DbContext factory
-    services.AddScoped<IDbContextFactory<MyDbContext>, MyDbContextFactory>();
+    services.AddScoped<IDbContextFactory<MyDbContext, Guid>, MyDbContextFactory>();
 }
 ```
 
@@ -43,16 +46,22 @@ public void ConfigureServices(IServiceCollection services)
 using Bounteous.Data.SqlServer;
 using Microsoft.EntityFrameworkCore;
 
-public class MyDbContextFactory : SqlServerDbContextFactory<MyDbContext>
+public class MyDbContextFactory : SqlServerDbContextFactory<MyDbContext, Guid>
 {
-    public MyDbContextFactory(IConnectionBuilder connectionBuilder, IDbContextObserver observer)
-        : base(connectionBuilder, observer)
+    public MyDbContextFactory(
+        IConnectionBuilder connectionBuilder, 
+        IDbContextObserver observer,
+        IIdentityProvider<Guid> identityProvider)
+        : base(connectionBuilder, observer, identityProvider)
     {
     }
 
-    protected override MyDbContext Create(DbContextOptions<DbContextBase> options, IDbContextObserver observer)
+    protected override MyDbContext Create(
+        DbContextOptions options, 
+        IDbContextObserver observer,
+        IIdentityProvider<Guid> identityProvider)
     {
-        return new MyDbContext(options, observer);
+        return new MyDbContext(options, observer, identityProvider);
     }
 }
 ```
@@ -123,14 +132,20 @@ Bounteous.Data.SqlServer builds upon the foundation of `Bounteous.Data` and prov
 
 ### SQL Server-Specific DbContext Factory
 
-The `SqlServerDbContextFactory<T>` class provides SQL Server-optimized configuration:
+The `SqlServerDbContextFactory<T, TUserId>` class provides SQL Server-optimized configuration:
 
 ```csharp
-public abstract class SqlServerDbContextFactory<T> : DbContextFactory<T> where T : IDbContext
+public abstract class SqlServerDbContextFactory<T, TUserId>(
+    IConnectionBuilder connectionBuilder,
+    IDbContextObserver observer,
+    IIdentityProvider<TUserId> identityProvider)
+    : DbContextFactory<T, TUserId>(connectionBuilder, observer, identityProvider)
+    where T : IDbContext<TUserId>
+    where TUserId : struct
 {
-    protected override DbContextOptions<DbContextBase> ApplyOptions(bool sensitiveDataLoggingEnabled = false)
+    protected override DbContextOptions ApplyOptions(bool sensitiveDataLoggingEnabled = false)
     {
-        return new DbContextOptionsBuilder<DbContextBase>()
+        return new DbContextOptionsBuilder<DbContextBase<TUserId>>()
             .UseSqlServer(ConnectionBuilder.AdminConnectionString, sqlOptions => 
             { 
                 sqlOptions.EnableRetryOnFailure(); 
@@ -143,6 +158,8 @@ public abstract class SqlServerDbContextFactory<T> : DbContextFactory<T> where T
 ```
 
 **Features:**
+- **Generic User ID Support**: Supports different user ID types (`Guid`, `long`, `int`, etc.) via `TUserId` generic parameter
+- **Identity Provider Integration**: Automatic user tracking through `IIdentityProvider<TUserId>` for audit fields
 - **Retry on Failure**: Automatic retry for transient SQL Server connection issues
 - **Sensitive Data Logging**: Configurable logging for debugging (disabled in production)
 - **Detailed Errors**: Enhanced error reporting for development
@@ -382,10 +399,13 @@ public class ReportService
 ### SQL Server-Specific DbContext Configuration
 
 ```csharp
-public class MyDbContext : DbContextBase
+public class MyDbContext : DbContextBase<Guid>
 {
-    public MyDbContext(DbContextOptions<DbContextBase> options, IDbContextObserver observer)
-        : base(options, observer)
+    public MyDbContext(
+        DbContextOptions options, 
+        IDbContextObserver observer,
+        IIdentityProvider<Guid> identityProvider)
+        : base(options, observer, identityProvider)
     {
     }
 
@@ -463,7 +483,7 @@ modelBuilder.Entity<Order>()
 ## 📋 Dependencies
 
 - **Bounteous.Core** (0.0.16) - Core utilities and patterns
-- **Bounteous.Data** (0.0.15) - Base data access functionality
+- **Bounteous.Data** (0.0.21) - Base data access functionality
 - **Microsoft.EntityFrameworkCore** (9.0.9) - Entity Framework Core
 - **Microsoft.EntityFrameworkCore.SqlServer** (9.0.9) - SQL Server provider for EF Core
 - **EntityFrameworkCore.NamingConventions** (8.0.0) - Naming convention support
