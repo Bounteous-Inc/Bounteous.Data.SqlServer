@@ -210,10 +210,7 @@ public class SqlServerDbContextFactoryLongTests
             .Options;
 
         await using var context = new SqlServerTestDbContextLong(options, mockObserver.Object, mockIdentityProvider.Object);
-        var entity = new TestEntityLong 
-        { 
-            Id = 1L
-        };
+        var entity = new TestEntityLong { Id = 1L };
         context.Entities.Add(entity);
 
         // Act
