@@ -9,7 +9,7 @@
 
     <ItemGroup>
       <PackageReference Include="Bounteous.Core" Version="[0.0.18,1.0.0)" />
-      <PackageReference Include="Bounteous.Data" Version="[0.0.24,1.0.0)" />
+      <PackageReference Include="Bounteous.Data" Version="0.0.26" />
       <PackageReference Include="EntityFrameworkCore.NamingConventions" Version="8.0.0" />
       <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.1" />
       <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.1">
