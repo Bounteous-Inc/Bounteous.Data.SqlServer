@@ -2,7 +2,7 @@ using Bounteous.Data.Domain.Interfaces;
 
 namespace Bounteous.Data.SqlServer.Tests.Domain;
 
-public class TestEntityLong : IAuditable<long, long>
+public class TestEntityLong : IAuditable<long, long>, ISoftDelete
 {
     public long Id { get; set; }
     public DateTime CreatedOn { get; set; }
