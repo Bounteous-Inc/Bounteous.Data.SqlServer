@@ -5,6 +5,10 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <Version>0.0.17</Version>
+        <PackageId>Bounteous.Data.SqlServer</PackageId>
+        <Authors>Bounteous</Authors>
+        <Company>Xerris Inc.</Company>
+        <LicenseExpression>MIT</LicenseExpression>
     </PropertyGroup>
 
     <ItemGroup>
