@@ -5,20 +5,24 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <Version>0.0.17</Version>
+        <PackageId>Bounteous.Data.SqlServer</PackageId>
+        <Authors>Bounteous</Authors>
+        <Company>Xerris Inc.</Company>
+        <LicenseExpression>MIT</LicenseExpression>
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="Bounteous.Core" Version="[0.0.18,1.0.0)" />
-      <PackageReference Include="Bounteous.Data" Version="0.0.26" />
+      <PackageReference Include="Bounteous.Core" Version="0.0.20" />
+      <PackageReference Include="Bounteous.Data" Version="0.0.29" />
       <PackageReference Include="EntityFrameworkCore.NamingConventions" Version="8.0.0" />
-      <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.1" />
-      <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.1">
+      <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.5" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.5">
         <PrivateAssets>all</PrivateAssets>
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       </PackageReference>
-      <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="10.0.1" />
-      <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.1" />
-      <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.1" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="10.0.5" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.5" />
+      <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.5" />
     </ItemGroup>
 
     <ItemGroup>
