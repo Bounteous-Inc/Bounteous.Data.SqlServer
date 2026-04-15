@@ -4,7 +4,7 @@
         <TargetFramework>net10.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <Version>0.0.17</Version>
+        <Version>0.0.18</Version>
         <PackageId>Bounteous.Data.SqlServer</PackageId>
         <Authors>Bounteous</Authors>
         <Company>Xerris Inc.</Company>
