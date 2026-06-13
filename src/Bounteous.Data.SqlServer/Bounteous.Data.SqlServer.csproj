@@ -8,7 +8,7 @@
         <PackageId>Bounteous.Data.SqlServer</PackageId>
         <Authors>Bounteous</Authors>
         <Company>Xerris Inc.</Company>
-        <LicenseExpression>MIT</LicenseExpression>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
     </PropertyGroup>
 
     <ItemGroup>
